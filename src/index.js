@@ -112,7 +112,8 @@ OR
           .from('questions')
           .where({ id: questionNumber })
           .then(data => {
-            response = `Question:
+            if (data.lenght) {
+              response = `Question:
 ${data[0].question}
 
 Answers:
@@ -120,6 +121,9 @@ A) ${data[0].answer_a}
 B) ${data[0].answer_b}
 C) ${data[0].answer_c}
 D) ${data[0].answer_d}`;
+            } else {
+              response = `No question ${questionNumber}, try another.`;
+            }
           })
           .then(() => {
             nexmo.message.sendSms(
