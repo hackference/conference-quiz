@@ -15,7 +15,7 @@ const nexmo = new Nexmo({
 
 // Setup Hapi
 const server = new Hapi.Server();
-server.connection({ port: 8000, host: 'localhost' });
+server.connection({ port: process.env.PORT || 8000, host: '0.0.0.0' });
 
 // Base route
 server.route({
