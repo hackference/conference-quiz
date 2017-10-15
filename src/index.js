@@ -32,6 +32,29 @@ server.route({
   path: '/nexmo-webhook',
   handler: (request, reply) => {
     console.log(request.query);
+    let response;
+    let message = request.query.text;
+    let regex = /([0-9]+)[ ]?([A-D]?)/gi;
+    let found = regex.exec(message);
+    if (!found) {
+      response = `Sorry, we don't understand please send a number for the question & possible answers or number followed by the letter for your answer.
+
+example
+1 for question 1 and it's answers
+OR
+1a to answer a for question 1`;
+    } else {
+      const question = found[1];
+      const answer = found[2];
+      response = `Q: ${question}
+A: ${answer}`;
+    }
+    nexmo.message.sendSms(
+      request.query.to,
+      request.query.msisdn,
+      response,
+      () => {}
+    );
     reply({});
   }
 });
