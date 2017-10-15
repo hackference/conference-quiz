@@ -23,9 +23,7 @@
   "dependencies": {
     "dotenv": "^4.0.0",
     "hapi": "^16.6.2",
-    "nexmo": "^2.0.2"
-  },
-  "devDependencies": {
+    "nexmo": "^2.0.2",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.0"
   }
