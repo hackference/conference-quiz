@@ -30,19 +30,19 @@ Database.schema
     table.string('answer_b');
     table.string('answer_c');
     table.string('answer_d');
+    table.string('correct_answer');
     table.timestamps(true, true);
   })
-  .then();
+  .then(console.log);
 Database.schema
   .createTableIfNotExists('answers', table => {
     table.increments();
     table.bigInteger('number');
-    table.integer('question').unsigned();
-    table.foreign('question').references('questions.id');
+    table.integer('question');
     table.string('answer');
     table.timestamps(true, true);
   })
-  .then();
+  .then(console.log);
 
 // Setup Hapi
 const server = new Hapi.Server();
@@ -53,7 +53,48 @@ server.route({
   method: 'GET',
   path: '/',
   handler: (request, reply) => {
-    reply('Hackference conference quiz!');
+    Database.select(
+      'id',
+      'question',
+      'answer_a',
+      'answer_b',
+      'answer_c',
+      'answer_d'
+    )
+      .from('questions')
+      .then(data => {
+        reply(`
+          <html>
+            <head>
+              <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Hackference Conference Quiz!</h1>
+                <p>To participate, simply answer the below questions by sending the question number and answer (1a) to:</p>
+                <p><strong><h3>+447520618867</h3></strong><p>
+                <ul>
+                ${data
+                  .map(question => {
+                    return `<li>
+                    <p><strong>${question.id}) ${question.question}</strong><p>
+                    <ul>
+                      <li>&nbsp;&nbsp;&nbsp;A - ${question.answer_a}</li>
+                      <li>&nbsp;&nbsp;&nbsp;B - ${question.answer_b}</li>
+                      <li>&nbsp;&nbsp;&nbsp;C - ${question.answer_c}</li>
+                      <li>&nbsp;&nbsp;&nbsp;D - ${question.answer_d}</li>
+                    </ul>
+                  </li>`;
+                  })
+                  .join('')}
+                </ul>
+              </div>
+            </body>
+          </html>
+          `);
+      });
   }
 });
 
@@ -62,7 +103,6 @@ server.route({
   method: ['GET', 'POST'],
   path: '/nexmo-webhook',
   handler: (request, reply) => {
-    console.log(request.query);
     let response;
     let message = request.query.text;
     let regex = /([0-9]+)[ ]?([A-D]?)/gi;
@@ -82,7 +122,7 @@ OR
       );
     } else {
       const questionNumber = found[1];
-      const answer = found[2];
+      const answer = found[2].toLowerCase();
       if (answer) {
         Database.insert({
           number: request.query.msisdn,
@@ -112,7 +152,7 @@ OR
           .from('questions')
           .where({ id: questionNumber })
           .then(data => {
-            if (data.lenght) {
+            if (data.length) {
               response = `Question:
 ${data[0].question}
 
@@ -138,10 +178,6 @@ D) ${data[0].answer_d}`;
     reply({});
   }
 });
-Database.select('question', 'answer_a', 'answer_b', 'answer_c', 'answer_d')
-  .from('questions')
-  .where({ id: 1 })
-  .then(data => {});
 // Start the server
 server.start(err => {
   if (err) {
