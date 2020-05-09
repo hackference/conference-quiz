@@ -23,7 +23,7 @@
   "homepage": "https://github.com/hackference/conference-quiz#readme",
   "dependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
+    "babel-preset-env": "^1.7.0",
     "dotenv": "^4.0.0",
     "hapi": "^16.6.2",
     "knex": "^0.13.0",
